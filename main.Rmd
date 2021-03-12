@@ -37,13 +37,29 @@ p2 <- ggplot(renal_NC, aes(x=BETA)) + geom_histogram(bins=15, color="white") + t
 grid.arrange(p1, p2, ncol=2)
 ```
 
-## Rint
+## Rint?
 ```{r}
+# tbh the data looks kinda normal so maybe we can fit distr? I'm not sure this is correct lol
 renal_PA$BETA_rint <- qnorm((rank(renal_PA$BETA)-0.5)/length(renal_PA$BETA))
 renal_NC$BETA_rint <- qnorm((rank(renal_NC$BETA)-0.5)/length(renal_NC$BETA))
 p1 <- ggplot(renal_PA, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
 p2 <- ggplot(renal_NC, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("NC")
 grid.arrange(p1, p2, ncol=2)
 ```
+
+## Fit distr
+```{r}
+par(mfrow=c(1,2)) 
+qqnorm(renal_PA$BETA, main="PA")
+qqnorm(renal_PA$BETA, main="NC")
+p1 <- ggplot(renal_PA, aes(x=BETA)) + geom_histogram(bins=15, color="white", aes(y=..density..)) + theme_minimal() + ggtitle("PA")
+p2 <- ggplot(renal_NC, aes(x=BETA)) + geom_histogram(bins=15, color="white", aes(y=..density..)) + theme_minimal() + ggtitle("NC")
+d1_estimate <- MASS::fitdistr(renal_PA$BETA, "normal")$estimate
+d2_estimate <- MASS::fitdistr(renal_NC$BETA, "normal")$estimate
+p1 <- p1 + stat_function(fun=dnorm, args=d1_estimate, color="red")
+p2 <- p2 + stat_function(fun=dnorm, args=d2_estimate, color="red")
+grid.arrange(p1, p2, ncol=2)
+```
+
 
 
