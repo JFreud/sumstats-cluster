@@ -1,0 +1,48 @@
+---
+title: "Final Project"
+output: pdf_document
+---
+
+```{r, echo=FALSE}
+require(ggplot2)
+require(gridExtra)
+# import protein altering sheet
+raw_PA <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST7", skip=1)
+# import noncoding sheet
+raw_NC <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST8", skip=1)
+
+renal_PA <- raw_PA[raw_PA$`Trait category` == "Renal",]
+renal_NC <- raw_NC[raw_NC$`Trait category` == "Renal",]
+nrow(renal_PA)
+nrow(renal_NC)
+```
+
+## Summary statistics summary
+```{r}
+# variant count frequencies
+p1 <- ggplot(as.data.frame(table(renal_PA$ID)), aes(x=Freq)) + 
+  geom_histogram(bins=5, color="white") + 
+  ggtitle("PA variant freq") + theme_minimal()
+p2 <- ggplot(as.data.frame(table(renal_NC$ID)), aes(x=Freq)) + 
+  geom_histogram(bins=8, color="white") + 
+  ggtitle("NC variant freq") + theme_minimal()
+grid.arrange(p1, p2, ncol=2)
+```
+
+```{r}
+# distribution of Betas
+p1 <- ggplot(renal_PA, aes(x=BETA)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
+p2 <- ggplot(renal_NC, aes(x=BETA)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("NC")
+grid.arrange(p1, p2, ncol=2)
+```
+
+## Rint
+```{r}
+renal_PA$BETA_rint <- qnorm((rank(renal_PA$BETA)-0.5)/length(renal_PA$BETA))
+renal_NC$BETA_rint <- qnorm((rank(renal_NC$BETA)-0.5)/length(renal_NC$BETA))
+p1 <- ggplot(renal_PA, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
+p2 <- ggplot(renal_NC, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("NC")
+grid.arrange(p1, p2, ncol=2)
+```
+
+
