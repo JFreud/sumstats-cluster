@@ -6,6 +6,7 @@ output: pdf_document
 ```{r, echo=FALSE}
 require(ggplot2)
 require(gridExtra)
+source("functions.R")
 # import protein altering sheet
 raw_PA <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST7", skip=1)
 # import noncoding sheet
