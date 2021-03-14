@@ -4,11 +4,13 @@ output: pdf_document
 ---
 
 ```{r, echo=FALSE}
-require(ggplot2)
-require(gridExtra)
-require(dplyr)
+library(ggplot2)
+library(gridExtra)
+library(dplyr)
+library(reshape2)
 source("functions.R")
 source("binary_sampler.R")
+source("plot_functions.R")
 # import protein altering sheet
 raw_PA <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST7", skip=1)
 # import noncoding sheet
@@ -40,7 +42,7 @@ ggplot(df, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_mi
 
 ```{r}
 # num traits affected each variant affects
-variants_binary <- table(df$ID, df$Trait)
+variants_binary <- table(df$ID, df$Trait, useNA="no")
 counts <- data.frame(rowSums(variants_binary))
 counts <- cbind(variant=rownames(counts), counts)
 rownames(counts) <- 1:nrow(counts)
@@ -49,19 +51,45 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 ```
 
 # Binary sample
-```{r}
-K <- 6 # number of trait categories
-R <- ncol(variants_binary)
-niter <- 10
-res <- gibbs(variants_binary, K, R, niter=niter)
 
+### K = 6
+```{r}
+res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=100)
+```
+
+```{r}
 table(res$z[niter,])/nrow(variants_binary)
-res$pi[niter,]
 table(df$`Trait category`)/nrow(df)
 assignments <- data.frame(
-  variant=rownames(variants_binary), 
-  assignment=res$z[niter,],
-  assignment_prob=apply(res$p.z.given.x[,,niter], 2, max))
+  ID=rownames(variants_binary), 
+  assignment=res$z[niter,])
+assignments <- cbind(assignments, t(res$p.z.given.x[,,niter]))
 assignments[1:10,]
+```
+
+```{r}
+# stacked barplot of assignment probabilities (see plots folder for full plot)
+melt_assignments <- melt(assignments[1:100,],id.vars = c("ID", "assignment"))
+melt_assignments <- melt_assignments[order(melt_assignments$assignment),]
+melt_assignments$ID <- factor(melt_assignments$ID, levels = unique(melt_assignments$ID))
+ggplot(melt_assignments) + 
+  geom_bar(aes(y = value, x = ID, fill = variable),stat="identity") +
+  ylab("Assignment Probability") + xlab("")
+# ggsave("plots/binary_stacked.png")
+```
+
+```{r}
+# proportion of variants in each cluster for each trait
+df$assignment <- sapply(df$ID, function(x) {assignments[assignments$ID==x, ]$assignment})
+t <- table(df$Trait, df$assignment)
+# doesn't seem to nec match pre-defined categories but looks like it makes biological sense...
+round(table(df$Trait, df$assignment)/rowSums(t), 2)
+```
+
+```{r}
+# ternary plots for every 3-combination of clusters
+res3 <- gibbs(variants_binary, K=3, R=ncol(variants_binary), niter=100)
+
+
 ```
 
