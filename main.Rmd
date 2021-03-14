@@ -6,60 +6,52 @@ output: pdf_document
 ```{r, echo=FALSE}
 require(ggplot2)
 require(gridExtra)
+require(dplyr)
 source("functions.R")
+source("binary_sampler.R")
 # import protein altering sheet
 raw_PA <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST7", skip=1)
 # import noncoding sheet
 raw_NC <- readxl::read_excel("data/ukb_biomarker_supp.xlsx", sheet="ST8", skip=1)
-
-renal_PA <- raw_PA[raw_PA$`Trait category` == "Renal",]
-renal_NC <- raw_NC[raw_NC$`Trait category` == "Renal",]
-nrow(renal_PA)
-nrow(renal_NC)
+df <- bind_rows(raw_PA, raw_NC)
 ```
 
 ## Summary statistics summary
 ```{r}
 # variant count frequencies
-p1 <- ggplot(as.data.frame(table(renal_PA$ID)), aes(x=Freq)) + 
-  geom_histogram(bins=5, color="white") + 
-  ggtitle("PA variant freq") + theme_minimal()
-p2 <- ggplot(as.data.frame(table(renal_NC$ID)), aes(x=Freq)) + 
-  geom_histogram(bins=8, color="white") + 
-  ggtitle("NC variant freq") + theme_minimal()
-grid.arrange(p1, p2, ncol=2)
+p1 <- ggplot(as.data.frame(table(df$ID)), aes(x=Freq)) + 
+  geom_histogram(bins=25, color="white") + 
+  ggtitle("Freq of counts of # of traits variants affect") + 
+  xlab("# of traits affected") + ylab("Frequency") + theme_minimal()
+# histogram of betas
+p2 <- ggplot(df, aes(x=BETA)) + geom_histogram(aes(y=..density..),bins=100,color="white") + 
+  theme_minimal() + ggtitle("Distr of betas") + xlim(c(-0.5,0.5))
+# try to fit a normal and see how it looks
+d_estimate <- MASS::fitdistr(df$BETA, "normal")$estimate 
+p2 <- p2 + stat_function(fun=dnorm, args=d_estimate, color="red")
+grid.arrange(p1,p2,ncol=2)
+```
+
+## Rint
+```{r}
+df$BETA_rint <- qnorm((rank(df$BETA)-0.5)/length(df$BETA))
+ggplot(df, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
 ```
 
 ```{r}
-# distribution of Betas
-p1 <- ggplot(renal_PA, aes(x=BETA)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
-p2 <- ggplot(renal_NC, aes(x=BETA)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("NC")
-grid.arrange(p1, p2, ncol=2)
+# num traits affected each variant affects
+variants_binary <- table(df$ID, df$Trait)
+counts <- data.frame(rowSums(variants_binary))
+counts <- cbind(variant=rownames(counts), counts)
+rownames(counts) <- 1:nrow(counts)
+# num variants that influence more than one trait
+nrow(counts[counts$rowSums.variants_binary.>1,])
 ```
 
-## Rint?
+# Binary sample
 ```{r}
-# tbh the data looks kinda normal so maybe we can fit distr? I'm not sure this is correct lol
-renal_PA$BETA_rint <- qnorm((rank(renal_PA$BETA)-0.5)/length(renal_PA$BETA))
-renal_NC$BETA_rint <- qnorm((rank(renal_NC$BETA)-0.5)/length(renal_NC$BETA))
-p1 <- ggplot(renal_PA, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("PA")
-p2 <- ggplot(renal_NC, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_minimal() + ggtitle("NC")
-grid.arrange(p1, p2, ncol=2)
+# K <- 6 # number of trait categories
+# R <- ncol(variants_binary)
+# gibbs(variants_binary, K, R)
 ```
-
-## Fit distr
-```{r}
-par(mfrow=c(1,2)) 
-qqnorm(renal_PA$BETA, main="PA")
-qqnorm(renal_PA$BETA, main="NC")
-p1 <- ggplot(renal_PA, aes(x=BETA)) + geom_histogram(bins=15, color="white", aes(y=..density..)) + theme_minimal() + ggtitle("PA")
-p2 <- ggplot(renal_NC, aes(x=BETA)) + geom_histogram(bins=15, color="white", aes(y=..density..)) + theme_minimal() + ggtitle("NC")
-d1_estimate <- MASS::fitdistr(renal_PA$BETA, "normal")$estimate
-d2_estimate <- MASS::fitdistr(renal_NC$BETA, "normal")$estimate
-p1 <- p1 + stat_function(fun=dnorm, args=d1_estimate, color="red")
-p2 <- p2 + stat_function(fun=dnorm, args=d2_estimate, color="red")
-grid.arrange(p1, p2, ncol=2)
-```
-
-
 
