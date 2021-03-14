@@ -50,8 +50,18 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 
 # Binary sample
 ```{r}
-# K <- 6 # number of trait categories
-# R <- ncol(variants_binary)
-# gibbs(variants_binary, K, R)
+K <- 6 # number of trait categories
+R <- ncol(variants_binary)
+niter <- 10
+res <- gibbs(variants_binary, K, R, niter=niter)
+
+table(res$z[niter,])/nrow(variants_binary)
+res$pi[niter,]
+table(df$`Trait category`)/nrow(df)
+assignments <- data.frame(
+  variant=rownames(variants_binary), 
+  assignment=res$z[niter,],
+  assignment_prob=apply(res$p.z.given.x[,,niter], 2, max))
+assignments[1:10,]
 ```
 

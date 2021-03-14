@@ -27,13 +27,14 @@ sample_z <- function(x,P,pi_vec){
   K <- nrow(P)
   loglik_matrix <- apply(x, 1, log_pr_x_given_P, P=P)
   lik_matrix <- exp(loglik_matrix)
-  p.z.given.x <- pi_vec * lik_matrix
+  # p.z.given.x <- pi_vec * lik_matrix
+  p.z.given.x <- sweep(lik_matrix, MARGIN=1, pi_vec, `*`)
   p.z.given.x <- apply(p.z.given.x,2,normalize) # normalize lik * prior
   z <- rep(0, nrow(x))
   for(i in 1:length(z)){
     z[i] <- sample(1:K, size=1,prob=p.z.given.x[,i],replace=TRUE)
   }
-  return(z)
+  return(list(z=z, p.z.given.x=p.z.given.x))
 }
 
 
@@ -42,7 +43,7 @@ sample_z <- function(x,P,pi_vec){
 #' @return a K by R matrix of effect frequencies
 sample_P <- function(x, z, k){
   R <- ncol(x)
-  P <- matrix(ncol=R,nrow=2)
+  P <- matrix(nrow=K,ncol=R)
   for(i in 1:k){
     sample_size <- sum(z==i)
     if(sample_size==0){
@@ -73,16 +74,20 @@ gibbs <- function(x, K, R, niter = 100){
   # initalize z
   z <- sample(1:K,nrow(x),replace=TRUE)
   res = list(z = matrix(nrow=niter, ncol=nrow(x)),
-             P = array(rep(NaN, K*R*niter), c(K, R, niter))
-             pi = matrix(nrow=niter,ncol=k))
+             P = array(rep(NaN, K*R*niter), c(K, R, niter)),
+             pi = matrix(nrow=niter,ncol=K),
+             p.z.given.x = array(rep(NaN, nrow(x)*K*niter), c(K, nrow(x), niter)))
   res$z[1,] <- z
 
   for(i in 2:niter){
     P <- sample_P(x, z, K)
     pi_vec <- sample_pi(z, K)
-    z <- sample_z(x,P,pi_vec)
+    zsample <- sample_z(x,P,pi_vec)
+    z <- zsample$z
+    p.z.given.x <- zsample$p.z.given.x
     res$z[i,] <- z
     res$P[,,i] <- P
+    res$p.z.given.x[,,i] <- p.z.given.x
     res$pi[i,] <- pi_vec
   }
   return(res)
