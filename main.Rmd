@@ -54,28 +54,24 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 
 ### K = 6
 ```{r}
-res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=100)
+niter <- 100
+res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=niter)
 ```
 
 ```{r}
+# visualize gibbs trajectory
+```
+
+
+```{r}
 table(res$z[niter,])/nrow(variants_binary)
-table(df$`Trait category`)/nrow(df)
-assignments <- data.frame(
-  ID=rownames(variants_binary), 
-  assignment=res$z[niter,])
-assignments <- cbind(assignments, t(res$p.z.given.x[,,niter]))
-assignments[1:10,]
+# df cols: ID, assignment, P(1), P(2), P(3), P(4), P(5), P(6)
+assignments <- get_cluster_assignments(variants_binary, res, niter=niter)
 ```
 
 ```{r}
 # stacked barplot of assignment probabilities (see plots folder for full plot)
-melt_assignments <- melt(assignments[1:100,],id.vars = c("ID", "assignment"))
-melt_assignments <- melt_assignments[order(melt_assignments$assignment),]
-melt_assignments$ID <- factor(melt_assignments$ID, levels = unique(melt_assignments$ID))
-ggplot(melt_assignments) + 
-  geom_bar(aes(y = value, x = ID, fill = variable),stat="identity") +
-  ylab("Assignment Probability") + xlab("")
-# ggsave("plots/binary_stacked.png")
+structure_plot(assignments, n=100)
 ```
 
 ```{r}
@@ -86,10 +82,15 @@ t <- table(df$Trait, df$assignment)
 round(table(df$Trait, df$assignment)/rowSums(t), 2)
 ```
 
+### K = 3
 ```{r}
-# ternary plots for every 3-combination of clusters
 res3 <- gibbs(variants_binary, K=3, R=ncol(variants_binary), niter=100)
-
-
+assignments3 <- get_cluster_assignments(x=variants_binary, res=res3, niter=100)
+structure_plot(assignments3, n=100)
+# examine by trait
+df$assignment3 <- sapply(df$ID, function(x) {assignments3[assignments3$ID==x, ]$assignment})
+t3 <- table(df$Trait, df$assignment3)
+round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ```
+
 

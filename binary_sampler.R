@@ -40,10 +40,11 @@ sample_z <- function(x,P,pi_vec){
 
 #' @param x an n by R matrix of data
 #' @param z an n vector of cluster allocations
+#' @param k number of clusters
 #' @return a K by R matrix of effect frequencies
 sample_P <- function(x, z, k){
   R <- ncol(x)
-  P <- matrix(nrow=K,ncol=R)
+  P <- matrix(nrow=k,ncol=R)
   for(i in 1:k){
     sample_size <- sum(z==i)
     if(sample_size==0){
@@ -54,19 +55,6 @@ sample_P <- function(x, z, k){
     P[i,] <- rbeta(R,1+number_of_ones,1+sample_size-number_of_ones)
   }
   return(P)
-}
-
-gibbs <- function(x,niter=100){
-  z <- sample(1:2,nrow(x),replace<-TRUE)
-  res <- list(z <- matrix(nrow=niter, ncol=nrow(x)))
-  res$z[1,] <- z
-
-  for(i in 2:niter){
-    P <- sample_P(x,z)
-    z <- sample_z(x,P)
-    res$z[i,] <- z
-  }
-  return(res)
 }
 
 #' @param R number of biomarkers
