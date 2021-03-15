@@ -56,11 +56,13 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 
 ### K = 6
 ```{r}
-niter <- 500
+niter <- 1000
 res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=niter)
 # visualize gibbs trajectory for effect frequencies
 plot_gibbs_chain(res, 6)
 ```
+
+
 ```{r, include=FALSE}
 # try several chains
 # for (i in 1:10) {
@@ -144,6 +146,10 @@ round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ```{r}
 # refer to appendix of structure paper, not sure this is right
 posterior_K_raw(variants_binary, assignments, P_mean, 0.1)
+
+K_posteriors <- matrix(,ncol=10,nrow=2)
+for 
+
 ```
 
 

@@ -35,4 +35,10 @@ plot_gibbs_chain <- function(res, K) {
   for (i in 2:6) {
     lines(res$pi[,i],col=i)
   }
+  plot(res$p.z.given.x[1,1,],type="l", ylim=c(0,1), main="p z given x")
+  for (i in 1:nrow(res$p.z.given.x)) {
+    for (j in 1:20) {
+      lines(res$p.z.given.x[i,j,],col=i+j)
+    }
+  }
 }
