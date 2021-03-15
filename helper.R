@@ -22,3 +22,11 @@ get_mode <- function(x) {
   ux <- unique(x)
   ux[which.max(tabulate(match(x, ux)))]
 }
+
+
+mat_mean <- function(mat) {
+  X <- list(mat)
+  Y <- do.call(cbind, X)
+  Y <- array(Y, dim=c(dim(X[[1]]), length(X)))
+  return(apply(Y, c(1, 2), mean, na.rm = TRUE))
+}

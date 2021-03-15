@@ -97,3 +97,17 @@ posterior_K_raw <- function(variants_binary, assignments, P_mean, prior) {
   p_k_given_x <- p_x_given_k * prior
   return(p_k_given_x)
 }
+
+K_inference <- function(variants_binary, k_max) {
+  k_max <- 10
+  K_posteriors <- matrix(,nrow=10,ncol=2)
+  for (k in 1:k_max) {
+    K_posteriors[k,1] <- k
+    res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=100)
+    assignments <- get_cluster_assignments(x=variants_binary, res=res, niter=100)
+    P_mean <- mat_mean(res$P[,,-(1:50)])
+    K_posteriors[k,2] <- posterior_K_raw(variants_binary, assignments, P_mean, prior=1.0/k_max)
+  }
+  K_posteriors[,2] <- sapply(K_posteriors[,2], function(x) {x / sum(K_posteriors[,2])})
+  return(K_posteriors)
+}
