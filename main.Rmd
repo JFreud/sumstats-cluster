@@ -42,6 +42,7 @@ ggplot(df, aes(x=BETA_rint)) + geom_histogram(bins=15, color="white") + theme_mi
 ```
 
 ```{r}
+df$Trait_combined <- paste0(df$Trait, " (", df$`Trait category`, ")")
 # num traits affected each variant affects
 variants_binary <- table(df$ID, df$Trait, useNA="no")
 counts <- data.frame(rowSums(variants_binary))
@@ -58,37 +59,41 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 niter <- 500
 res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=niter)
 # visualize gibbs trajectory for effect frequencies
-plot(res$P[1,1,],type="l", ylim=c(0,1))
-for (i in 1:6) {
-  for (j in 1:35) {
-    lines(res$P[i,j,],col=i+j)
-  }
-}
+plot_gibbs_chain(res, 6)
 ```
-```{r}
-plot(res$pi[,1],type="l", ylim=c(0,1))
-for (i in 2:6) {
-  lines(res$pi[,i],col=i)
-}
+```{r, include=FALSE}
+# try several chains
+# for (i in 1:10) {
+#   print(gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=60)$pi[60,])
+# }
+pi_mean <- colSums(res$pi[-(1:50),])/nrow(res$pi[-(1:50),])
+# get mean of P
+X <- list(res$P[,,-(1:50)])
+Y <- do.call(cbind, X)
+Y <- array(Y, dim=c(dim(X[[1]]), length(X)))
+P_mean <- apply(Y, c(1, 2), mean, na.rm = TRUE)
 ```
 
 
 ```{r}
 table(res$z[niter,])/nrow(variants_binary)
 # df cols: ID, assignment, P(1), P(2), P(3), P(4), P(5), P(6)
-assignments <- get_cluster_assignments(variants_binary, res, niter=niter)
+assignments <- get_cluster_assignments(data=df, x=variants_binary, res=res, niter=niter)
 ```
 
 ```{r}
 # stacked barplot of assignment probabilities (see plots folder for full plot)
-# structure_plot(assignments) # takes a moment to run
-structure_plot(assignments, n=100)
+# note: these are not admixture proportions, the variants can't be decomposed into something analagous to loci
+# stacked_barplot(assignments, do_save=T, fname="binary_stacked_by_assignment.png", orderby="assignment") # takes a moment to run
+# stacked_barplot(assignments, do_save=T, fname="binary_stacked_by_position.png", orderby="position") # takes a moment to run
+# idk why the axis labels aren't showing up
+stacked_barplot(assignments, n=100, orderby="assignment")
+stacked_barplot(assignments, n=100, orderby="position")
 ```
 
 ```{r}
 # proportion of variants in each cluster for each trait
 df$assignment <- sapply(df$ID, function(x) {assignments[assignments$ID==x, ]$assignment})
-df$Trait_combined <- paste0(df$Trait, " (", df$`Trait category`, ")")
 t <- table(df$Trait_combined, df$assignment)
 # doesn't seem to nec match pre-defined categories but looks like it makes biological sense...
 t_prop <- round(table(df$Trait, df$assignment)/rowSums(t), 2)
@@ -127,7 +132,7 @@ res3 <- gibbs(variants_binary, K=3, R=ncol(variants_binary), niter=niter3)
 assignments3 <- get_cluster_assignments(x=variants_binary, res=res3, niter=niter3)
 ```
 ```{r}
-structure_plot(assignments3)
+stacked_barplot(assignments3)
 # examine by trait
 df$assignment3 <- sapply(df$ID, function(x) {assignments3[assignments3$ID==x, ]$assignment})
 t3 <- table(df$Trait, df$assignment3)
@@ -135,9 +140,17 @@ round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ```
 
 
-
 ### Find posterior for K
 ```{r}
+# refer to appendix of structure paper, not sure this is right
+log_p_xi_given_zP <- rep(0, nrow(assignments))
+for (i in 1:nrow(assignments)) {
+  z <- assignments[i,]$assignment
+  for (j in 1:35) {
+    log_p_xi_given_zP[i] <- log_p_xi_given_zP[i] + dbinom(variants_binary[i,j], 1, prob=P_mean[z,j], log=T)
+  }
+}
+mu_hat <- mean(-2 * log_p_xi_given_zP)
 
 ```
 

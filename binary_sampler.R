@@ -51,6 +51,7 @@ sample_P <- function(x, z, k){
     } else {
       number_of_ones <- colSums(x[z==i,])
     }
+    # note this is making the simplifying assumption that biomarkers are independent which they are clearly not
     P[i,] <- rbeta(R,1+number_of_ones,1+sample_size-number_of_ones)
   }
   return(P)
@@ -78,4 +79,20 @@ gibbs <- function(x, K, R, niter = 100){
     res$pi[i,] <- pi_vec
   }
   return(res)
+}
+
+
+posterior_K <- function(variants_binary, assignments, P_mean, prior) {
+  # refer to appendix of structure paper, not sure this is right
+  log_p_xi_given_zP <- rep(0, nrow(assignments))
+  for (i in 1:nrow(assignments)) {
+    z <- assignments[i,]$assignment
+    for (j in 1:35) {
+      log_p_xi_given_zP[i] <- log_p_xi_given_zP[i] + dbinom(variants_binary[i,j], 1, prob=P_mean[z,j], log=T)
+    }
+  }
+  mu_hat <- mean(-2 * log_p_xi_given_zP)
+  sigma2_hat <- mean((-2 * log_p_xi_given_zP - mu_hat)^2)
+  # p_x_given_k <- ...
+  # p_k_given_x <- ...
 }
