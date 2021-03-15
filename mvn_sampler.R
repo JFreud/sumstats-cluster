@@ -1,6 +1,11 @@
 # referenced https://stephens999.github.io/fiveMinuteStats/gibbs_structure_simple.html
 # and https://stephens999.github.io/fiveMinuteStats/gibbs2.html
 
+
+library(mvtnorm)
+library(LaplacesDemon)
+library(gtools)
+
 #' @param x an R vector of data for on variant
 #' @param mu a K * R matrix of MVN mean parameters
 #' @param Sigma a length K * R^2 matrix of MVN covariance parameters
