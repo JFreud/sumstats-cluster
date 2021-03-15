@@ -15,7 +15,7 @@ stacked_barplot <- function(assignments, n, do_save=F, fname="plot.png",orderby=
   }
   melt_assignments$ID <- factor(melt_assignments$ID, levels = unique(melt_assignments$ID))
   p <- ggplot(melt_assignments) +
-    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + ggtitle("Assignment probabilities for variants") +
+    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + ggtitle(paste("Assignment probabilities for variants by", orderby)) +
     ylab("Assignment Probability") + xlab(paste("Variants ordered by", orderby))
   if (do_save) {
     ggsave(filename=paste0("plots/", fname), plot=p)
