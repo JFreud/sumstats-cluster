@@ -143,15 +143,7 @@ round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ### Find posterior for K
 ```{r}
 # refer to appendix of structure paper, not sure this is right
-log_p_xi_given_zP <- rep(0, nrow(assignments))
-for (i in 1:nrow(assignments)) {
-  z <- assignments[i,]$assignment
-  for (j in 1:35) {
-    log_p_xi_given_zP[i] <- log_p_xi_given_zP[i] + dbinom(variants_binary[i,j], 1, prob=P_mean[z,j], log=T)
-  }
-}
-mu_hat <- mean(-2 * log_p_xi_given_zP)
-
+posterior_K_raw(variants_binary, assignments, P_mean, 0.1)
 ```
 
 

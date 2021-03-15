@@ -82,7 +82,7 @@ gibbs <- function(x, K, R, niter = 100){
 }
 
 
-posterior_K <- function(variants_binary, assignments, P_mean, prior) {
+posterior_K_raw <- function(variants_binary, assignments, P_mean, prior) {
   # refer to appendix of structure paper, not sure this is right
   log_p_xi_given_zP <- rep(0, nrow(assignments))
   for (i in 1:nrow(assignments)) {
@@ -93,6 +93,7 @@ posterior_K <- function(variants_binary, assignments, P_mean, prior) {
   }
   mu_hat <- mean(-2 * log_p_xi_given_zP)
   sigma2_hat <- mean((-2 * log_p_xi_given_zP - mu_hat)^2)
-  # p_x_given_k <- ...
-  # p_k_given_x <- ...
+  p_x_given_k <- exp(-mu_hat/2 - sigma2_hat/8)
+  p_k_given_x <- p_x_given_k * prior
+  return(p_k_given_x)
 }
