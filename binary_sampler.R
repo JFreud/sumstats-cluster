@@ -27,7 +27,6 @@ sample_z <- function(x,P,pi_vec){
   K <- nrow(P)
   loglik_matrix <- apply(x, 1, log_pr_x_given_P, P=P)
   lik_matrix <- exp(loglik_matrix)
-  # p.z.given.x <- pi_vec * lik_matrix
   p.z.given.x <- sweep(lik_matrix, MARGIN=1, pi_vec, `*`)
   p.z.given.x <- apply(p.z.given.x,2,normalize) # normalize lik * prior
   z <- rep(0, nrow(x))

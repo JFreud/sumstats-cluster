@@ -10,10 +10,10 @@ structure_plot <- function(assignments, n, do_save=F, fname="plot.png") {
   melt_assignments <- melt_assignments[order(melt_assignments$assignment),]
   melt_assignments$ID <- factor(melt_assignments$ID, levels = unique(melt_assignments$ID))
   p <- ggplot(melt_assignments) +
-    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity") +
+    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) +
     ylab("Assignment Probability") + xlab("")
   if (do_save) {
-    ggsave(p, paste0("plots/", fname))
+    ggsave(filename=paste0("plots/", fname), plot=p)
   }
   return(p)
 }
