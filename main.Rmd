@@ -56,11 +56,13 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 
 ### K = 6
 ```{r}
-niter <- 500
+niter <- 1000
 res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=niter)
 # visualize gibbs trajectory for effect frequencies
 plot_gibbs_chain(res, 6)
 ```
+
+
 ```{r, include=FALSE}
 # try several chains
 # for (i in 1:10) {
@@ -76,7 +78,7 @@ P_mean <- apply(Y, c(1, 2), mean, na.rm = TRUE)
 
 
 ```{r}
-table(res$z[niter,])/nrow(variants_binary)
+pi_mean
 # df cols: ID, assignment, P(1), P(2), P(3), P(4), P(5), P(6)
 assignments <- get_cluster_assignments(data=df, x=variants_binary, res=res, niter=niter)
 ```
@@ -123,6 +125,7 @@ AddToTernary(text, data_points, names(data_points), cex = 0.7, font = 2, col ="b
 # ternary plot abstraction TO DO:
 # iterate through traits, take >0.1 cluster prob and put onto triangle
 # maybe use ggtern to plot and make sure labels dont overlap
+
 ```
 
 ### K = 3
@@ -144,6 +147,9 @@ round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ```{r}
 # refer to appendix of structure paper, not sure this is right
 posterior_K_raw(variants_binary, assignments, P_mean, 0.1)
+
+K_mat <- K_inference(variants_binary, 10)
+K_mat
 ```
 
 
