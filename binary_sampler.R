@@ -1,5 +1,6 @@
 # referenced https://stephens999.github.io/fiveMinuteStats/gibbs_structure_simple.html
 # and https://stephens999.github.io/fiveMinuteStats/gibbs2.html
+source('helper.R')
 
 #' @param x an R vector of data for on variant
 #' @param P a K by R matrix of effect frequencies

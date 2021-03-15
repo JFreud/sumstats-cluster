@@ -5,13 +5,14 @@
 #' @param res result of gibbs sampler
 #' @param niter number of iterations for the gibbs sampling
 get_cluster_assignments <- function(data, x, res, niter=100) {
-  p_zmax <- apply(res$p.z.given.x[,,niter], 2, which.max)
   z_assignments <- apply(res$z[-(1:50),], 2, get_mode)
   # assign to cluster with highest probability
   assignments <- data.frame(
     ID=rownames(x),
     assignment=z_assignments)
-  assignments <- cbind(assignments, t(res$p.z.given.x[,,niter]))
+  # get samples from posterior for z and proportions of cluster allocations
+  z_prob <- apply(res$z[-(1:50),], 2, function(x) {table(factor(x, levels=1:6))})/(niter-50)
+  assignments <- cbind(assignments, t(z_prob))
   assignments$POS <- sapply(assignments$ID,function(x) {df[df$ID==x,]$POS[1]})
   assignments$POS <- unlist(assignments$POS)
   return(assignments)
