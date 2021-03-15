@@ -56,10 +56,13 @@ nrow(counts[counts$rowSums.variants_binary.>1,])
 ```{r}
 niter <- 100
 res <- gibbs(variants_binary, K=6, R=ncol(variants_binary), niter=niter)
-```
-
-```{r}
-# visualize gibbs trajectory
+# visualize gibbs trajectory for effect frequencies
+plot(res$P[1,1,],type="l", ylim=c(0,1))
+for (i in 1:6) {
+  for (j in 1:35) {
+    lines(res$P[i,j,],col=i+j)
+  }
+}
 ```
 
 
