@@ -50,6 +50,10 @@ counts <- cbind(variant=rownames(counts), counts)
 rownames(counts) <- 1:nrow(counts)
 # num variants that influence more than one trait
 nrow(counts[counts$rowSums.variants_binary.>1,])
+
+# key of trait to pre-defined category
+category_key <- df %>% distinct(Trait, .keep_all = TRUE) %>% select(Trait, `Trait category`)
+category_key <- category_key[order(category_key$Trait),]
 ```
 
 # Binary sample
@@ -98,20 +102,19 @@ stacked_barplot(assignments, n=100, orderby="position")
 df$assignment <- sapply(df$ID, function(x) {assignments[assignments$ID==x, ]$assignment})
 t <- table(df$Trait_combined, df$assignment)
 # doesn't seem to nec match pre-defined categories but looks like it makes biological sense...
-t_prop <- round(table(df$Trait, df$assignment)/rowSums(t), 2)
+t_prop <- table(df$Trait, df$assignment)/rowSums(t)
 t_prop <- as.data.frame.matrix(t_prop)
+rownames(t_prop) <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
+category_key$Trait_short <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
 t_prop
 ```
 
 ```{r}
-par(mar = rep(0, 4))
-
 
 # ternary plot abstraction TO DO:
 # iterate through traits, take >0.1 cluster prob and put onto triangle
 # maybe use ggtern to plot and make sure labels dont overlap
-
-plot_triangles(t_prop)
+plot_triangles(t_prop, n_top=4, category_key=category_key)
 ```
 
 ### K = 3

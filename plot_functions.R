@@ -43,14 +43,17 @@ plot_gibbs_chain <- function(res, K) {
   }
 }
 
+#' @param category_key mapping of trait to pre-defined trait category
 #' @param trait_prop R by K matrix or df of proportions of variants in cluster for each trait
-plot_triangles <- function(trait_prop) {
+#' @param n_top top n cluster memberships to consider when adding to triangle
+plot_triangles <- function(trait_prop, n_top=3, category_key) {
   triangle_list <- list()
   for (i in 1:nrow(t_prop)) {
     clusters <- which(t_prop[i,] > 0.1)
-    if (length(clusters) < 3) {
-      clusters <- sort(order(t_prop[i,], decreasing=T)[1:3])
+    if (length(clusters) < n_top) {
+      clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
     }
+    # clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
     triangles <- t(combn(clusters,3))
     # add to traits in triangles
     for (j in 1:nrow(triangles)) {
@@ -65,13 +68,15 @@ plot_triangles <- function(trait_prop) {
     }
   }
   p_list <- lapply(triangle_list, function(triangle) {
+    clusters <- colnames(triangle)
     curr_set <- triangle %>% tibble::rownames_to_column("trait")
-    colnames(curr_set) <- c("trait", "x", "y", "z")
-    p <- ggtern(curr_set,aes(x,y,z,label=trait)) +
-      geom_point(size=1.2, aes(color=rgb(x,y,z)),show.legend=FALSE) +
-      geom_text(vjust=1, size=2, aes(color=rgb(x,y,z)),show.legend=F, srt=20) +
-      labs(x="1",y="3",z="5",
-           xarrow="% variants in cluster 1", yarrow="% variants in cluster 3", zarrow="% variants in cluster 5") +
+    curr_set$category <- as.factor(unlist(lapply(curr_set$trait, function(x) {category_key[category_key$Trait_short==x,2]})))
+    colnames(curr_set) <- c("trait", "x", "y", "z", "category")
+    p <- ggtern(curr_set,aes(x,y,z,label=trait,color=category)) +
+      # geom_point(size=1.2, aes(color=rgb(x,y,z)),show.legend=FALSE) +
+      geom_text(vjust="bottom", size=3, aes(color=as.factor(category)),show.legend=T) +
+      labs(x=clusters[1],y=clusters[2],z=clusters[3],
+           xarrow=paste("% variants in cluster", clusters[1]), yarrow=paste("% variants in cluster", clusters[2]), zarrow=paste("% variants in cluster", clusters[3])) +
       theme_showarrows() +
       theme_nomask()
     return(p)
