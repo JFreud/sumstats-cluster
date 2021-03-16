@@ -1,7 +1,8 @@
 
 #' @param assignments df of variant assignments and cluster probabilities
 #' @param n number of varaints to visualize
-#' @param K number of varaints to visualize
+#' @param K number of clusters
+#' @param binary whether or not binary model was used
 #' @return ggplot plot object
 stacked_barplot <- function(assignments, n, K,
                             do_save=F,
