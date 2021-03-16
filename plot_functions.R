@@ -67,14 +67,16 @@ plot_triangles <- function(trait_prop, n_top=3, category_key) {
       }
     }
   }
+  colors <- setNames(c("#4e79a7","#f28e2b","#b07aa1", "#76b7b2", "#59a14f", "#9c755f"), levels(unique(category_key$`Trait category`)))
   p_list <- lapply(triangle_list, function(triangle) {
     clusters <- colnames(triangle)
     curr_set <- triangle %>% tibble::rownames_to_column("trait")
     curr_set$category <- as.factor(unlist(lapply(curr_set$trait, function(x) {category_key[category_key$Trait_short==x,2]})))
     colnames(curr_set) <- c("trait", "x", "y", "z", "category")
-    p <- ggtern(curr_set,aes(x,y,z,label=trait,color=category)) +
+    p <- ggtern(curr_set,aes(x,y,z,label=trait)) +
       # geom_point(size=1.2, aes(color=rgb(x,y,z)),show.legend=FALSE) +
-      geom_text(vjust="bottom", size=3, aes(color=as.factor(category)),show.legend=T) +
+      geom_text(vjust="bottom", size=3, aes(color=category),show.legend=T) +
+      scale_colour_manual(values=colors, drop=T) +
       labs(x=clusters[1],y=clusters[2],z=clusters[3],
            xarrow=paste("% variants in cluster", clusters[1]), yarrow=paste("% variants in cluster", clusters[2]), zarrow=paste("% variants in cluster", clusters[3])) +
       theme_showarrows() +
