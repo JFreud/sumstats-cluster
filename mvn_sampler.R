@@ -12,7 +12,6 @@ library(gtools)
 #' @return the log-likelihood for each of the K clusters
 
 log_pr_x_given_P <- function(x, mu, Sigma){
-    #print(mu)
     K <- nrow(mu)
     R <- ncol(mu)
     ret <- vector(length = K)
@@ -47,7 +46,7 @@ sample_z <- function(x, mu, Sigma, pi_vec){
     loglik_matrix <- apply(x, 1, log_pr_x_given_P, mu=mu, Sigma=Sigma)
     lik_matrix <- exp(loglik_matrix)
     p.z.given.x <- sweep(lik_matrix, MARGIN=1, pi_vec, `*`)
-    p.z.given.x <- apply(p.z.given.x,2,normalize) # normalize lik * prior
+    #p.z.given.x <- apply(p.z.given.x,2,normalize) # normalize lik * prior
     
     z <- rep(0, n)
     for(i in 1:n){
@@ -113,6 +112,7 @@ gibbs <- function(x, K, niter = 100){
     res$z[1,] <- z
     
     for(i in 2:niter){
+        if (i %% 10 == 0) {print(i)}
         params <- sample_params(x, z, K)
         mu <- params$mu
         Sigma <- params$Sigma
@@ -126,6 +126,8 @@ gibbs <- function(x, K, niter = 100){
         res$mu[,,i] <- mu
         res$Sigma[,,i] <- Sigma
         res$pi[i,] <- pi_vec
+        
+        #print(pi_vec) 
     }
     return(res)
 }
