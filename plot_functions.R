@@ -1,11 +1,14 @@
 
 #' @param assignments df of variant assignments and cluster probabilities
 #' @param n number of varaints to visualize
+#' @param K number of varaints to visualize
 #' @return ggplot plot object
-stacked_barplot <- function(assignments, n, do_save=F, fname="plot.png",orderby="assignment") {
-  if (missing(n)) {
-    n <- nrow(assignments)
-  }
+stacked_barplot <- function(assignments, n, K,
+                            do_save=F,
+                            binary = T,
+                            fname="plot.png",
+                            orderby="assignment") {
+  if (missing(n)) {n <- nrow(assignments)}
   melt_assignments <- melt(assignments[1:n,],id.vars = c("ID", "assignment", "POS"))
   if (orderby=="assignment") {
     melt_assignments <- melt_assignments[order(melt_assignments$assignment),]
@@ -14,11 +17,21 @@ stacked_barplot <- function(assignments, n, do_save=F, fname="plot.png",orderby=
     melt_assignments <- melt_assignments[order(melt_assignments$POS),]
   }
   melt_assignments$ID <- factor(melt_assignments$ID, levels = unique(melt_assignments$ID))
+  if (binary) {
+    model <- "binary model"
+  }
+  else {
+    model <- "continuous model"
+  }
+  title <- paste("Assignment probabilities by", orderby,
+                 ";", model, "K =", K)
   p <- ggplot(melt_assignments) +
-    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + ggtitle(paste("Assignment probabilities for variants by", orderby)) +
-    ylab("Assignment Probability") + xlab(paste("Variants ordered by", orderby))
+    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + 
+      ggtitle(title) +
+      ylab("Assignment Probability") + 
+      xlab(paste("Variants ordered by", orderby))
   if (do_save) {
-    ggsave(filename=paste0("plots/", fname), plot=p)
+    ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 4)
   }
   return(p)
 }
@@ -68,6 +81,7 @@ plot_triangles <- function(trait_prop, n_top=3, category_key) {
     }
   }
   colors <- setNames(c("#4e79a7","#f28e2b","#b07aa1", "#76b7b2", "#59a14f", "#9c755f"), levels(unique(category_key$`Trait category`)))
+  print(triangle_list)
   p_list <- lapply(triangle_list, function(triangle) {
     clusters <- colnames(triangle)
     curr_set <- triangle %>% tibble::rownames_to_column("trait")
