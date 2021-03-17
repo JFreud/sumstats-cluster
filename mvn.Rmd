@@ -1,0 +1,102 @@
+---
+title: "Final Project"
+output: pdf_document
+---
+```{r, echo=FALSE}
+library(tidyverse)
+library(reshape2)
+library(ggplot2)
+library(ggtern)
+
+source("helper.R")
+source("mvn_sampler.R")
+source("plot_functions.R")
+```
+
+## Rint
+```{r}
+df <- read.table("./data/combined.txt", header = T)
+df$BETA_rint <- qnorm((rank(df$Effect)-0.5)/length(df$Effect))
+
+variants_cont <- df %>% 
+    select(MarkerName, BETA_rint, Trait) %>% 
+    pivot_wider(names_from = Trait, values_from = BETA_rint) %>% 
+    na.replace(0) 
+
+data_mat <- as.matrix(variants_cont[,-1])
+rownames(data_mat) <- variants_cont$MarkerName
+```
+
+
+## Gibbs Sampler
+```{r}
+niter <- 500
+res <- gibbs(data_mat, K = 5, niter = niter)
+#res <- readRDS("./mvn-post-inf-3.Rdata")
+saveRDS(res, file = "./mvn-post-inf-5.Rdata")
+```
+
+## Analysis
+```{r}
+res <- readRDS("./mvn-post-inf-5-rint.Rdata")
+assignments <- get_cluster_assignments(data=df, x=data_mat, res=res, K = 5, niter=500)
+```
+
+```{r}
+# idk why the axis labels aren't showing up
+stacked_barplot(assignments, orderby="assignment", K = 5, binary = F, do_save = F)
+#stacked_barplot(assignments, orderby="position", K = 3, binary = F, do_save = T)
+```
+
+
+
+
+## 2D Projection
+```{r}
+Trait_cat <- df %>% 
+    group_by(MarkerName) %>%
+    summarise(Trait_cat) %>%
+    ungroup() %>% 
+    select(Trait_cat) %>% 
+    head(35)
+
+# proportion of variants in each cluster for each trait
+df$assignment <- rep(assignments$assignment, 35)
+sig <- df %>% filter(P.value <= 100*10^(-9))
+
+t <- table(sig$Trait, sig$assignment)
+# doesn't seem to nec match pre-defined categories but looks like it makes biological sense...
+t_prop <- round(table(sig$Trait, sig$assignment)/rowSums(t), 2)
+t_prop <- as.data.frame.matrix(t_prop)
+rownames(t_prop) <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
+t_prop <- cbind(Trait_cat, tibble::rownames_to_column(t_prop, "Trait"))
+
+t_prop %>% 
+    ggplot(aes(`5`, `4`)) +
+    geom_label(aes(label = Trait, fill = Trait_cat)) +
+    theme_bw()
+```
+
+
+
+
+## Triangle Plots
+```{r}
+source("plot_functions.R")
+
+df$assignment <- rep(assignments$assignment, 35)
+sig <- df %>% filter(P.value <= 100*10^(-9))
+
+t <- table(sig$Trait, sig$assignment)
+# doesn't seem to nec match pre-defined categories but looks like it makes biological sense...
+t_prop <- round(table(sig$Trait, sig$assignment)/rowSums(t), 2)
+t_prop <- as.data.frame.matrix(t_prop)
+rownames(t_prop) <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
+
+plot_list <- plot_triangles(t_prop, n_top = 5, category_key = category_key)
+plot_list[[10]]
+#ggsave("./plots/normal-triangle-k=3.png", width = 6, height = 4)
+```
+
+
+

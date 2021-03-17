@@ -82,7 +82,6 @@ plot_triangles <- function(trait_prop, n_top=3, category_key) {
     }
   }
   colors <- setNames(c("#4e79a7","#f28e2b","#b07aa1", "#76b7b2", "#59a14f", "#9c755f"), levels(unique(category_key$`Trait category`)))
-  print(triangle_list)
   p_list <- lapply(triangle_list, function(triangle) {
     clusters <- colnames(triangle)
     curr_set <- triangle %>% tibble::rownames_to_column("trait")
