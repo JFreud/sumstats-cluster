@@ -32,7 +32,7 @@ stacked_barplot <- function(assignments, n, K,
       ylab("Assignment Probability") +
       xlab(paste("Variants ordered by", orderby))
   if (do_save) {
-    ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 4)
+    ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 2)
   }
   return(p)
 }
