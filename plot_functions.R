@@ -27,10 +27,16 @@ stacked_barplot <- function(assignments, n, K,
   title <- paste("Assignment probabilities by", orderby,
                  ";", model, "K =", K)
   p <- ggplot(melt_assignments) +
-    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + 
+    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) +
       ggtitle(title) +
-      ylab("Assignment Probability") + 
-      xlab(paste("Variants ordered by", orderby))
+      ylab("Assignment Probability") +
+      xlab(paste("Variants ordered by", orderby)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y =element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank())
   if (do_save) {
     ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 2)
   }
@@ -62,22 +68,22 @@ plot_gibbs_chain <- function(res, K) {
 #' @param n_top top n cluster memberships to consider when adding to triangle
 plot_triangles <- function(trait_prop, n_top=3, category_key) {
   triangle_list <- list()
-  for (i in 1:nrow(t_prop)) {
-    clusters <- which(t_prop[i,] > 0.1)
+  for (i in 1:nrow(trait_prop)) {
+    clusters <- which(trait_prop[i,] > 0.1)
     if (length(clusters) < n_top) {
-      clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
+      clusters <- sort(order(trait_prop[i,], decreasing=T)[1:n_top])
     }
-    # clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
+    # clusters <- sort(order(trait_prop[i,], decreasing=T)[1:n_top])
     triangles <- t(combn(clusters,3))
     # add to traits in triangles
     for (j in 1:nrow(triangles)) {
       name <- paste(triangles[j,], collapse='')
       if (name %in% names(triangle_list)) {
         # add cluster values to triangle
-        triangle_list[[name]] <- rbind(triangle_list[[name]], t_prop[i,triangles[j,]])
+        triangle_list[[name]] <- rbind(triangle_list[[name]], trait_prop[i,triangles[j,]])
       } else {
         # create new triangle
-        triangle_list[[name]] <- t_prop[i,triangles[j,]]
+        triangle_list[[name]] <- trait_prop[i,triangles[j,]]
       }
     }
   }
@@ -90,7 +96,7 @@ plot_triangles <- function(trait_prop, n_top=3, category_key) {
     p <- ggtern(curr_set,aes(x,y,z,label=trait)) +
       # geom_point(size=1.2, aes(color=rgb(x,y,z)),show.legend=FALSE) +
       geom_text(vjust="bottom", size=3, aes(color=category),show.legend=T) +
-      scale_colour_manual(values=colors, drop=T) +
+      scale_colour_manual(values=colors) +
       labs(x=clusters[1],y=clusters[2],z=clusters[3],
            xarrow=paste("% variants in cluster", clusters[1]), yarrow=paste("% variants in cluster", clusters[2]), zarrow=paste("% variants in cluster", clusters[3])) +
       theme_showarrows() +

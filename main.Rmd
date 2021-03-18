@@ -4,12 +4,13 @@ output: pdf_document
 ---
 
 ```{r, echo=FALSE}
+setwd("/Users/jtf/Documents/uchicago-stats/stat_35450/sumstats-cluster")
 library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(reshape2)
-library(Ternary)
-source("functions.R")
+library(ggtern)
+source("helper.R")
 source("binary_sampler.R")
 source("plot_functions.R")
 # import protein altering sheet
@@ -151,9 +152,10 @@ plot_triangles(t_prop4, n_top=4, category_key=category_key)
 ### K = 5
 ```{r}
 niter5 <- 500
-res5 <- gibbs(variants_binary, K=5, R=ncol(variants_binary), niter=niter5)
+# res5 <- gibbs(variants_binary, K=5, R=ncol(variants_binary), niter=niter5)
+res5 <- readRDS("binary-5.Rdata")
 assignments5 <- get_cluster_assignments(x=variants_binary, res=res5, niter=niter5)
-stacked_barplot(assignments5, do_save=T, fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
+stacked_barplot(assignments5, do_save=T, K=5, binary=T,fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
 ```
 
 ```{r}
@@ -162,6 +164,10 @@ t_prop5 <- table(df$Trait, df$assignment5)/rowSums(table(df$Trait, df$assignment
 t_prop5 <- as.data.frame.matrix(t_prop5)
 rownames(t_prop5) <- category_key$Trait_short
 p_list <- plot_triangles(t_prop5, n_top=4, category_key=category_key)
+```
+
+```{r}
+p_list
 ```
 
 ### K = 7
