@@ -68,22 +68,22 @@ plot_gibbs_chain <- function(res, K) {
 #' @param n_top top n cluster memberships to consider when adding to triangle
 plot_triangles <- function(trait_prop, n_top=3, category_key) {
   triangle_list <- list()
-  for (i in 1:nrow(t_prop)) {
-    clusters <- which(t_prop[i,] > 0.1)
+  for (i in 1:nrow(trait_prop)) {
+    clusters <- which(trait_prop[i,] > 0.1)
     if (length(clusters) < n_top) {
-      clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
+      clusters <- sort(order(trait_prop[i,], decreasing=T)[1:n_top])
     }
-    # clusters <- sort(order(t_prop[i,], decreasing=T)[1:n_top])
+    # clusters <- sort(order(trait_prop[i,], decreasing=T)[1:n_top])
     triangles <- t(combn(clusters,3))
     # add to traits in triangles
     for (j in 1:nrow(triangles)) {
       name <- paste(triangles[j,], collapse='')
       if (name %in% names(triangle_list)) {
         # add cluster values to triangle
-        triangle_list[[name]] <- rbind(triangle_list[[name]], t_prop[i,triangles[j,]])
+        triangle_list[[name]] <- rbind(triangle_list[[name]], trait_prop[i,triangles[j,]])
       } else {
         # create new triangle
-        triangle_list[[name]] <- t_prop[i,triangles[j,]]
+        triangle_list[[name]] <- trait_prop[i,triangles[j,]]
       }
     }
   }

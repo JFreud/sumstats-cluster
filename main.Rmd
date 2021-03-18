@@ -9,6 +9,7 @@ library(ggplot2)
 library(gridExtra)
 library(dplyr)
 library(reshape2)
+library(ggtern)
 source("helper.R")
 source("binary_sampler.R")
 source("plot_functions.R")
@@ -163,6 +164,10 @@ t_prop5 <- table(df$Trait, df$assignment5)/rowSums(table(df$Trait, df$assignment
 t_prop5 <- as.data.frame.matrix(t_prop5)
 rownames(t_prop5) <- category_key$Trait_short
 p_list <- plot_triangles(t_prop5, n_top=4, category_key=category_key)
+```
+
+```{r}
+p_list
 ```
 
 ### K = 7
