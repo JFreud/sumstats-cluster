@@ -33,12 +33,12 @@ rownames(data_mat) <- variants_cont$MarkerName
 niter <- 500
 res <- gibbs(data_mat, K = 5, niter = niter)
 #res <- readRDS("./mvn-post-inf-3.Rdata")
-saveRDS(res, file = "./mvn-post-inf-5.Rdata")
+saveRDS(res, file = "./data/mvn-post-inf-5.Rdata")
 ```
 
 ## Analysis
 ```{r}
-res <- readRDS("./mvn-post-inf-5-rint.Rdata")
+res <- readRDS("./data/mvn-post-inf-5-rint.Rdata")
 # res <- readRDS("./mvn-post-inf-3-rint.Rdata")
 assignments <- get_cluster_assignments(data=df, x=data_mat, res=res, K = 5, niter=500)
 ```

@@ -58,7 +58,7 @@ category_key <- category_key[order(category_key$Trait),]
 category_key$Trait_short <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
 ```
 
-# Binary sample
+# Binary sampler
 
 ### K = 6
 ```{r}
@@ -154,7 +154,7 @@ plot_triangles(t_prop4, n_top=4, category_key=category_key)
 ```{r}
 niter5 <- 500
 # res5 <- gibbs(variants_binary, K=5, R=ncol(variants_binary), niter=niter5)
-res5 <- readRDS("binary-5.Rdata")
+res5 <- readRDS("data/binary-5.Rdata")
 assignments5 <- get_cluster_assignments(x=variants_binary, res=res5, niter=niter5, K=5)
 stacked_barplot(assignments5, do_save=T, K=5, binary=T,fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
 ```
