@@ -30,7 +30,13 @@ stacked_barplot <- function(assignments, n, K,
     geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) +
       ggtitle(title) +
       ylab("Assignment Probability") +
-      xlab(paste("Variants ordered by", orderby))
+      xlab(paste("Variants ordered by", orderby)) +
+    theme(axis.title.x=element_blank(),
+          axis.text.x=element_blank(),
+          axis.ticks.x=element_blank(),
+          axis.title.y =element_blank(),
+          axis.text.y=element_blank(),
+          axis.ticks.y=element_blank())
   if (do_save) {
     ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 2)
   }
