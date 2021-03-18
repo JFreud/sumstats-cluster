@@ -27,9 +27,9 @@ stacked_barplot <- function(assignments, n, K,
   title <- paste("Assignment probabilities by", orderby,
                  ";", model, "K =", K)
   p <- ggplot(melt_assignments) +
-    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) + 
+    geom_bar(aes(y = value, x = ID, fill = variable),stat="identity",width=1) +
       ggtitle(title) +
-      ylab("Assignment Probability") + 
+      ylab("Assignment Probability") +
       xlab(paste("Variants ordered by", orderby))
   if (do_save) {
     ggsave(filename=paste0("plots/", fname), plot=p, width = 6, height = 4)
@@ -90,7 +90,7 @@ plot_triangles <- function(trait_prop, n_top=3, category_key) {
     p <- ggtern(curr_set,aes(x,y,z,label=trait)) +
       # geom_point(size=1.2, aes(color=rgb(x,y,z)),show.legend=FALSE) +
       geom_text(vjust="bottom", size=3, aes(color=category),show.legend=T) +
-      scale_colour_manual(values=colors, drop=T) +
+      scale_colour_manual(values=colors) +
       labs(x=clusters[1],y=clusters[2],z=clusters[3],
            xarrow=paste("% variants in cluster", clusters[1]), yarrow=paste("% variants in cluster", clusters[2]), zarrow=paste("% variants in cluster", clusters[3])) +
       theme_showarrows() +
