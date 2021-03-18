@@ -39,6 +39,7 @@ saveRDS(res, file = "./mvn-post-inf-5.Rdata")
 ## Analysis
 ```{r}
 res <- readRDS("./mvn-post-inf-5-rint.Rdata")
+# res <- readRDS("./mvn-post-inf-3-rint.Rdata")
 assignments <- get_cluster_assignments(data=df, x=data_mat, res=res, K = 5, niter=500)
 ```
 
@@ -91,9 +92,9 @@ data.frame(x, t(mat)) %>%
     labs(color = "Cluster", title = "5 Cluster Mixture Mean Posterior") +
     xlab("trait") + 
     theme_bw() + 
-    theme(axis.title = element_text(), axis.title.x=element_text(), axis.text.x=element_text())
+    theme(plot.margin=margin(10,10,30,10))
 
-# ggsave("./plots/mu-post-k=5.png", width = 6, height = 4)
+ggsave("./plots/mu-post-k=5.png", width = 6, height = 4)
 ```
 
 
