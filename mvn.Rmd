@@ -86,11 +86,14 @@ x <- seq(1, 35)
 
 data.frame(x, t(mat)) %>%
     pivot_longer(cols = c(X1, X2, X3, X4, X5)) %>% 
-    ggplot(aes(x, value)) +
+    ggplot(aes(x=x, y=value)) +
     geom_line(aes(color = name)) +
     labs(color = "Cluster", title = "5 Cluster Mixture Mean Posterior") +
-    theme_bw() 
-ggsave("./plots/mu-post-k=5.png", width = 6, height = 4)
+    xlab("trait") + 
+    theme_bw() + 
+    theme(axis.title = element_text(), axis.title.x=element_text(), axis.text.x=element_text())
+
+# ggsave("./plots/mu-post-k=5.png", width = 6, height = 4)
 ```
 
 

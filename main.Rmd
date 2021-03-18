@@ -122,9 +122,10 @@ plot_triangles(t_prop, n_top=4, category_key=category_key)
 ```{r}
 niter3 <- 500
 res3 <- gibbs(variants_binary, K=3, R=ncol(variants_binary), niter=niter3)
-assignments3 <- get_cluster_assignments(x=variants_binary, res=res3, niter=niter3)
-stacked_barplot(assignments3, do_save=T, fname="binary_stacked_by_assignment_k=3.png", orderby="assignment") # takes a moment to run
+assignments3 <- get_cluster_assignments(x=variants_binary, res=res3, niter=niter3, K =3)
+stacked_barplot(assignments3, do_save=T, binary=T, K=3, fname="binary_stacked_by_assignment_k=3.png", orderby="assignment") # takes a moment to run
 ```
+
 ```{r}
 # stacked_barplot(assignments3)
 # examine by trait
@@ -137,7 +138,7 @@ round(table(df$Trait, df$assignment3)/rowSums(t3), 2)
 ```{r}
 niter4 <- 500
 res4 <- gibbs(variants_binary, K=4, R=ncol(variants_binary), niter=niter4)
-assignments4 <- get_cluster_assignments(x=variants_binary, res=res4, niter=niter4)
+assignments4 <- get_cluster_assignments(x=variants_binary, res=res4, niter=niter4, K=4)
 # stacked_barplot(assignments4, do_save=T, fname="binary_stacked_by_assignment_k=4.png", orderby="assignment") # takes a moment to run
 ```
 
@@ -154,7 +155,7 @@ plot_triangles(t_prop4, n_top=4, category_key=category_key)
 niter5 <- 500
 # res5 <- gibbs(variants_binary, K=5, R=ncol(variants_binary), niter=niter5)
 res5 <- readRDS("binary-5.Rdata")
-assignments5 <- get_cluster_assignments(x=variants_binary, res=res5, niter=niter5)
+assignments5 <- get_cluster_assignments(x=variants_binary, res=res5, niter=niter5, K=5)
 stacked_barplot(assignments5, do_save=T, K=5, binary=T,fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
 ```
 
@@ -175,7 +176,7 @@ p_list
 niter5 <- 500
 res5 <- gibbs(variants_binary, K=5, R=ncol(variants_binary), niter=niter5)
 assignments5 <- get_cluster_assignments(x=variants_binary, res=res5, niter=niter5)
-stacked_barplot(assignments5, do_save=T, fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
+stacked_barplot(assignments5, do_save=T, binary=T, K=7, fname="binary_stacked_by_assignment_k=5.png", orderby="assignment") # takes a moment to run
 ```
 
 ```{r}
