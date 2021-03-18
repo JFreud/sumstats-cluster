@@ -44,7 +44,7 @@ assignments <- get_cluster_assignments(data=df, x=data_mat, res=res, K = 5, nite
 
 ```{r}
 # idk why the axis labels aren't showing up
-stacked_barplot(assignments, orderby="assignment", K = 5, binary = F, do_save = F)
+stacked_barplot(assignments, orderby="assignment", K = 3, binary = F, do_save = F)
 #stacked_barplot(assignments, orderby="position", K = 5, binary = F, do_save = T)
 ```
 
@@ -72,9 +72,25 @@ t_prop <- cbind(Trait_cat, tibble::rownames_to_column(t_prop, "Trait"))
 t_prop
 
 t_prop %>% 
-    ggplot(aes(`1`, `2`)) +
+    ggplot(aes(`2`, `3`)) +
     geom_label(aes(label = Trait, fill = Trait_cat)) +
     theme_bw()
+```
+```{r}
+mat <- matrix(0, nrow = 5, ncol = 35)
+for (i in 51:500){
+    mat <- mat + res$mu[,,i]    
+}
+mat <- mat / 450
+x <- seq(1, 35)
+
+data.frame(x, t(mat)) %>%
+    pivot_longer(cols = c(X1, X2, X3, X4, X5)) %>% 
+    ggplot(aes(x, value)) +
+    geom_line(aes(color = name)) +
+    labs(color = "Cluster", title = "5 Cluster Mixture Mean Posterior") +
+    theme_bw() 
+ggsave("./plots/mu-post-k=5.png", width = 6, height = 4)
 ```
 
 
@@ -91,9 +107,11 @@ t_prop <- round(table(sig$Trait, sig$assignment)/rowSums(t), 2)
 t_prop <- as.data.frame.matrix(t_prop)
 rownames(t_prop) <- c("alt", "alb", "akp", "apA", "apB", "ast", "astalt", "crp", "cal", "chol", "crea", "creaU", "cysC", "dbili", "eGFR", "ggt", "glu", "HbA1c", "HDL", "IGF1", "LDL", "LpA", "malbU", "nalb", "phos", "potU", "SHBG", "sodU", "test", "tbili", "tprot", "trig", "urate", "urea", "vitD")
 
-plot_list <- plot_triangles(t_prop, n_top = 3, category_key = category_key)
-plot_list
-#ggsave("./plots/normal-triangle-k=3.png", width = 6, height = 4)
+plot_list <- plot_triangles(t_prop, n_top = 5, category_key = category_key)
+```
+```{r}
+plot_list[["234"]]
+ggsave("./plots/normal-triangle-234-k=5.png", width = 6, height = 4)
 ```
 
 
